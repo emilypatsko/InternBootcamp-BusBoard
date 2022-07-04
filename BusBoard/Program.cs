@@ -9,13 +9,19 @@ namespace BusBoard
             var builder = new ConfigurationBuilder()
                 .AddJsonFile(@"C:\Users\EmiPat\source\repos\Bootcamp\BusBoard\BusBoard\appsettings.Development.json");
             var config = builder.Build();
-            var api = new TransportApi(config);
+            var transportApi = new TransportApi(config);
+            var postcodeApi = new PostcodeApi();
 
             Console.WriteLine("Welcome to BusBoard!");
-            Console.Write("Please enter a bus stop code: ");
-            var stopCode = Console.ReadLine();
-            var departures = await api.GetDepartures(stopCode);
-            PrintDepartures(departures);
+            Console.Write("Please enter a postcode: ");
+            var postcode = Console.ReadLine();
+            var postcodeResponse = await postcodeApi.GetLatitudeAndLongitude(postcode);
+            var stops = await transportApi.GetNearestStops(postcodeResponse.Latitude, postcodeResponse.Longitude);
+            foreach (var stop in stops)
+            {
+                var departures = await transportApi.GetDepartures(stop.StopCode);
+                PrintDepartures(departures);
+            }
         }
 
         private static void PrintDepartures(DeparturesResponse departures)
