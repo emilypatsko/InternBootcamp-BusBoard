@@ -1,15 +1,10 @@
-﻿using Microsoft.Extensions.Configuration;
-
-namespace BusBoard
+﻿namespace BusBoard
 {
     class Program
     {
         static async Task Main(string[] args)
         {
-            var builder = new ConfigurationBuilder()
-                .AddJsonFile(@"C:\Users\EmiPat\source\repos\Bootcamp\BusBoard\BusBoard\appsettings.Development.json");
-            var config = builder.Build();
-            var transportApi = new TransportApi(config);
+            var transportApi = new TransportApi();
             var postcodeApi = new PostcodeApi();
 
             Console.WriteLine("Welcome to BusBoard!");

@@ -8,9 +8,11 @@ namespace BusBoard
         private readonly IConfiguration _config;
         private readonly HttpClient _client;
         private readonly string _credentials;
-        public TransportApi(IConfiguration config)
+        public TransportApi()
         {
-            _config = config;
+            var builder = new ConfigurationBuilder()
+                .AddJsonFile(@"C:\Users\EmiPat\source\repos\Bootcamp\BusBoard\BusBoard.Api\appsettings.Development.json");
+            _config = builder.Build();
             _client = new HttpClient();
             _client.BaseAddress = new Uri(@"http://transportapi.com/v3/uk/");
             _credentials = $"app_id={_config["ApiSecrets:AppId"]}&app_key={_config["ApiSecrets:AppKey"]}";

@@ -4,7 +4,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BusBoard.Api", "BusBoard.Ap
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BusBoard.Web", "BusBoard.Web\BusBoard.Web.csproj", "{65727AC7-D40B-4C62-8C0C-B881C1CAF5DA}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BusBoard", "BusBoard\BusBoard.csproj", "{E7693D6E-3DF6-4CAB-B14D-577FA0D9B163}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BusBoard.Console", "BusBoard.Console\BusBoard.Console.csproj", "{E7693D6E-3DF6-4CAB-B14D-577FA0D9B163}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
