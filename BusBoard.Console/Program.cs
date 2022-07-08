@@ -21,25 +21,9 @@
             }
 
             var postcodeResponse = await PostcodeApi.GetLatitudeAndLongitude(postcode);
-            var stops = await Get2NearestStops(postcodeResponse);
-            var stopsAndDepartures = await GetDeparturesForStops(stops);
+            var stops = await TransportApi.Get2NearestStops(postcodeResponse);
+            var stopsAndDepartures = await TransportApi.GetDeparturesForStops(stops);
             PrintDeparturesForStops(stopsAndDepartures);
-        }
-
-        private static async Task<List<BusStopResponse>> Get2NearestStops(PostcodeResponse postcodeResponse)
-        {
-            return await TransportApi.GetNearestStops(postcodeResponse.Latitude, postcodeResponse.Longitude);
-        }
-
-        private static async Task<List<DeparturesResponse>> GetDeparturesForStops(List<BusStopResponse> busStops)
-        {
-            var stopsAndDepartures = new List<DeparturesResponse>();
-            foreach (var stop in busStops)
-            {
-                stopsAndDepartures.Add(await TransportApi.GetDepartures(stop.StopCode));
-            }
-
-            return stopsAndDepartures;
         }
 
         private static void PrintDeparturesForStops(List<DeparturesResponse> stopsAndDepartures)

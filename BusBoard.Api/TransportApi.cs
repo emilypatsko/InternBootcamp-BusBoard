@@ -18,7 +18,12 @@ namespace BusBoard
             _credentials = $"app_id={_config["ApiSecrets:AppId"]}&app_key={_config["ApiSecrets:AppKey"]}";
         }
 
-        public async Task<List<BusStopResponse>> GetNearestStops(string latitude, string longitude)
+        public async Task<List<BusStopResponse>> Get2NearestStops(PostcodeResponse postcodeResponse)
+        {
+            return await Get2NearestStops(postcodeResponse.Latitude, postcodeResponse.Longitude);
+        }
+
+        private async Task<List<BusStopResponse>> Get2NearestStops(string latitude, string longitude)
         {
             var busStops = new List<BusStopResponse>();
             var parameters = $"places.json?type=bus_stop&lat={latitude}&lon={longitude}&{_credentials}";
@@ -35,7 +40,18 @@ namespace BusBoard
             return busStops;
         }
 
-        public async Task<DeparturesResponse> GetDepartures(string stopCode)
+        public async Task<List<DeparturesResponse>> GetDeparturesForStops(List<BusStopResponse> busStops)
+        {
+            var stopsAndDepartures = new List<DeparturesResponse>();
+            foreach (var stop in busStops)
+            {
+                stopsAndDepartures.Add(await GetDepartures(stop.StopCode));
+            }
+
+            return stopsAndDepartures;
+        }
+
+        private async Task<DeparturesResponse> GetDepartures(string stopCode)
         {
             var departures = new DeparturesResponse();
 
