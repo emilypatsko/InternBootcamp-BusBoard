@@ -3,21 +3,37 @@
     ViewBag.Title = "Home Page";
 }
 
-<div class="jumbotron">
-    <h1>BusBoard</h1>
-    <p class="lead">For all your bus info needs. Enter a postcode below and click enter to see bus times for that location.</p>
-</div>
-
-<div class="row">
-    <div class="col-md-12">
-        @using (Html.BeginForm("BusInfo", "Home", FormMethod.Get))
-        {
-            <fieldset>
-                <legend>Post Code:</legend>
-                @Html.TextBoxFor(m => m.Postcode)
-
-                <input type="submit" value="Get Bus Info" />
-            </fieldset>
-        }
+@functions {
+    string InputClassModifier()
+    {
+        if (Model is null) return "";
+        var isInvalid = !ViewData.ModelState.IsValid || String.IsNullOrEmpty(Model.Postcode);
+        return isInvalid ? "is-invalid" : "";
+    }
+}
+<div class="p-5 mb-4 bg-light rounded-3">
+    <div class="container-fluid py-5">
+        <h1 class="display-5 fw-bold">BusBoard</h1>
+        <p class="col-md-8 fs-4">For all your bus info needs. Enter a postcode below and click enter to see bus times for that location.</p>
     </div>
 </div>
+
+@using (Html.BeginForm("Index", "Home", FormMethod.Post))
+{
+    <div class="d-flex align-items-center flex-column">
+        <div class="row mb-3">
+            <div class="col-sm-auto">
+                <legend>Postcode:</legend>
+            </div>
+            <div class="col-sm-auto">
+                @Html.TextBoxFor(m => m.Postcode, new {@class = $"form-control {InputClassModifier()}"})
+            </div>
+            <div class="col-sm-auto">
+                <input type="submit" class="btn btn-primary" value="Get Bus Info"/>
+            </div>
+        </div>
+        <div class="row mb-3">
+            @Html.ValidationMessageFor(m => m.Postcode, null, new {@class = "text-danger"})
+        </div>
+    </div>
+}

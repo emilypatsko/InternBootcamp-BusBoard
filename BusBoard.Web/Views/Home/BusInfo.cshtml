@@ -2,6 +2,7 @@
 @{
   ViewBag.Title = "Bus Information";
 }
+<meta http-equiv="refresh" content="30">
 
 <h2>BusInfo</h2>
 
@@ -11,7 +12,7 @@
     <table class="table">
         @foreach (var stop in Model.StopsAndDepartures)
         {
-            <thead class="table-dark">
+            <thead class="table-primary">
                 <tr>
                     <th colspan="4">Departures from @stop.StopName</th>
                 </tr>
