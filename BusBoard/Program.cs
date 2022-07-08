@@ -4,41 +4,74 @@ namespace BusBoard
 {
     class Program
     {
+        private static readonly IConfiguration Config = new ConfigurationBuilder()
+            .AddJsonFile(@"C:\Users\EmiPat\source\repos\Bootcamp\BusBoard\BusBoard\appsettings.Development.json")
+            .Build();
+        private static readonly TransportApi TransportApi = new TransportApi(Config);
+        private static readonly PostcodeApi PostcodeApi = new PostcodeApi();
+
         static async Task Main(string[] args)
         {
-            var builder = new ConfigurationBuilder()
-                .AddJsonFile(@"C:\Users\EmiPat\source\repos\Bootcamp\BusBoard\BusBoard\appsettings.Development.json");
-            var config = builder.Build();
-            var transportApi = new TransportApi(config);
-            var postcodeApi = new PostcodeApi();
-
             Console.WriteLine("Welcome to BusBoard!");
             Console.Write("Please enter a postcode: ");
             var postcode = Console.ReadLine();
-            var postcodeResponse = await postcodeApi.GetLatitudeAndLongitude(postcode);
-            var stops = await transportApi.GetNearestStops(postcodeResponse.Latitude, postcodeResponse.Longitude);
-            foreach (var stop in stops)
-            {
-                var departures = await transportApi.GetDepartures(stop.StopCode);
-                PrintDepartures(departures);
-            }
+            await GetAndPrintBuses(postcode);
         }
 
-        private static void PrintDepartures(DeparturesResponse departures)
+        private static async Task GetAndPrintBuses(string? postcode)
         {
-            Console.WriteLine();
-            Console.WriteLine($"Bus departures from {departures.StopName}");
-            Console.WriteLine("======================================================================");
-            var buses = departures.Departures.Values.ToList().SelectMany(x => x)
+            if (String.IsNullOrEmpty(postcode))
+            {
+                return;
+            }
+
+            var postcodeResponse = await PostcodeApi.GetLatitudeAndLongitude(postcode);
+            var stops = await Get2NearestStops(postcodeResponse);
+            var stopsAndDepartures = await GetDeparturesForStops(stops);
+            PrintDeparturesForStops(stopsAndDepartures);
+        }
+
+        private static async Task<List<BusStopResponse>> Get2NearestStops(PostcodeResponse postcodeResponse)
+        {
+            return await TransportApi.GetNearestStops(postcodeResponse.Latitude, postcodeResponse.Longitude);
+        }
+
+        private static async Task<List<DeparturesResponse>> GetDeparturesForStops(List<BusStopResponse> busStops)
+        {
+            var stopsAndDepartures = new List<DeparturesResponse>();
+            foreach (var stop in busStops)
+            {
+                stopsAndDepartures.Add(await TransportApi.GetDepartures(stop.StopCode));
+            }
+
+            return stopsAndDepartures;
+        }
+
+        private static void PrintDeparturesForStops(List<DeparturesResponse> stopsAndDepartures)
+        {
+            stopsAndDepartures.ForEach(PrintDeparturesForStop);
+        }
+
+        private static void PrintDeparturesForStop(DeparturesResponse stopAndDepartures)
+        {
+            // Flatten dictionary of buses (indexed by bus line) to list of buses
+            var buses = stopAndDepartures.Departures.Values.ToList().SelectMany(x => x)
                 .OrderBy(bus => bus.ExpectedDepartureTime)
                 .Take(5)
                 .ToList();
 
-            Console.WriteLine("{0,-15}{1,-25}{2,-15}{3,-15}", "Line Number", "Direction", "Aimed", "Expected");
-            Console.WriteLine("======================================================================");
-            buses.ForEach(bus => Console.WriteLine("{0,-15}{1,-25}{2,-15}{3,-15}",
+            // Figure out how wide the table needs to be (some bus directions are quite long...)
+            var dirColWidth = buses.Max(b => b.Direction.Length) + 5;
+            var dividerLength = 45 + dirColWidth;
+
+            Console.WriteLine();
+            Console.WriteLine($"Bus departures from {stopAndDepartures.StopName}");
+            Console.WriteLine(new String('=', dividerLength));
+            Console.WriteLine("{0,-15}{1}{2,-15}{3,-15}", "Line Number", "Direction".PadRight(dirColWidth), "Aimed", "Expected");
+            Console.WriteLine(new String('=', dividerLength));
+            buses.ForEach(bus => Console.WriteLine("{0,-15}{1}{2,-15}{3,-15}",
                 bus.LineNumber,
-                bus.Direction,
+                bus.Direction.PadRight(dirColWidth),
                 bus.AimedDepartureTime,
                 bus.ExpectedDepartureTime));
         }
